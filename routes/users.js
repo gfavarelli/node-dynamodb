@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
     if (dados) {
         return res.send(dados);
     }
-    
+    console.log('trete');
     return res.status(404).send("Usuário não encontrado");
 });
 
