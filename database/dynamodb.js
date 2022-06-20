@@ -5,7 +5,7 @@ const { encrypt, getSenhaDecrypt }  = require('./../utils/crypto');
 const awsConfig = {
     "region": "sa-east-1",
     "endpoint": "http://dynamodb.sa-east-1.amazonaws.com",
-    "accessKeyId": "SUA_KEY_ID", "secretAccessKey": "SUA_ACCESS_KEY"
+    "accessKeyId": "SUA_KEY_ID", "secretAccessKey": "SUA_SECRET_KEY"
 };
 
 AWS.config.update(awsConfig);
@@ -19,7 +19,6 @@ async function salvar(bodyRequest) {
     bodyRequest.cadastro = new Date().toString();
     bodyRequest.senha = senhaEncrypt;
 
-    console.log(bodyRequest);
     var params = {
         TableName: "Usuario",
         Item:  bodyRequest
