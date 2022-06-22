@@ -21,8 +21,7 @@ async function salvar(bodyRequest) {
     };
 
     try {
-        const data = await dynamoDb.put(params).promise();
-        console.log('Item', data);
+        await dynamoDb.put(params).promise();
         return bodyRequest;
     } catch (err) {
         console.log('err', err);
