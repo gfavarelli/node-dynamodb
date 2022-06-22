@@ -1,14 +1,10 @@
 const crypto = require('crypto');
 const AWS = require("aws-sdk");
-const { encrypt, getSenhaDecrypt }  = require('./../utils/crypto');
+const { encrypt, getSenhaDecrypt } = require('../utils/crypto');
+const { AwsConfig } = require('../config/Credenciais');
 
-const awsConfig = {
-    "region": "sa-east-1",
-    "endpoint": "http://dynamodb.sa-east-1.amazonaws.com",
-    "accessKeyId": "SUA_KEY_ID", "secretAccessKey": "SUA_SECRET_KEY"
-};
-
-AWS.config.update(awsConfig);
+const tableName = "Usuario";
+AWS.config.update(AwsConfig);
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 async function salvar(bodyRequest) {
@@ -20,21 +16,23 @@ async function salvar(bodyRequest) {
     bodyRequest.senha = senhaEncrypt;
 
     var params = {
-        TableName: "Usuario",
-        Item:  bodyRequest
+        TableName: tableName,
+        Item: bodyRequest
     };
 
     try {
         const data = await dynamoDb.put(params).promise();
+        console.log('Item', data);
         return bodyRequest;
     } catch (err) {
+        console.log('err', err);
         return null;
     }
 }
 
 async function remover(id, email) {
     var params = {
-        TableName: 'Usuario',
+        TableName: tableName,
         Key: {
             id: id,
             email: email
@@ -43,18 +41,19 @@ async function remover(id, email) {
 
     try {
         const item = await dynamoDb.delete(params).promise();
+
         return true;
     } catch (err) {
-        console.log(err);
+        console.log('err', err);
         return false;
     }
 }
 
 async function buscaPorEmailSenha(email, senha) {
     try {
-        
+
         var params = {
-            TableName: "Usuario",
+            TableName: tableName,
             FilterExpression: "email = :email",
             ExpressionAttributeValues: {
                 ":email": email
@@ -62,13 +61,13 @@ async function buscaPorEmailSenha(email, senha) {
         }
 
         const dados = await dynamoDb.scan(params).promise();
-        
+
         if (dados && dados.Items) {
             const usuario = dados.Items[0];
             const senhaDecrypt = getSenhaDecrypt(usuario.senha);
             return (senha === senhaDecrypt) ? usuario : null
         }
-        
+
         return null;
     } catch (err) {
         return null;
@@ -78,7 +77,7 @@ async function buscaPorEmailSenha(email, senha) {
 async function buscaPorEmail(email) {
     try {
         var params = {
-            TableName: "Usuario",
+            TableName: tableName,
             FilterExpression: "email = :email",
             ExpressionAttributeValues: {
                 ":email": email
@@ -88,13 +87,14 @@ async function buscaPorEmail(email) {
         const dados = await dynamoDb.scan(params).promise();
         return dados.Items[0];
     } catch (err) {
+        console.log('err', err);
         return null;
     }
 }
 
 async function alterar(usuario) {
     var params = {
-        TableName: "Usuario",
+        TableName: tableName,
         Key: { "id": usuario.id, "email": usuario.email },
         UpdateExpression: "set nome = :nome",
         ExpressionAttributeValues: {
@@ -118,4 +118,3 @@ module.exports = {
     alterar,
     buscaPorEmailSenha
 }
-        
